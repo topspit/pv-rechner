@@ -13,6 +13,5 @@ steps:
       '--role=roles/run.invoker',
       '--region=europe-west3'
     ]
-
 options:
   logging: CLOUD_LOGGING_ONLY
