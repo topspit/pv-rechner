@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PV-Kalkulation</title>
+    <script>
+        function berechne() {
+            let investition = parseFloat(document.getElementById("investition").value);
+            let zins = parseFloat(document.getElementById("zins").value) / 100;
+            let laufzeit = parseInt(document.getElementById("laufzeit").value);
+            let stromproduktion = parseFloat(document.getElementById("stromproduktion").value);
+            let einspeiseverguetung = parseFloat(document.getElementById("einspeiseverguetung").value) / 100;
+            let jahresverbrauch = parseFloat(document.getElementById("jahresverbrauch").value);
+            let eigenquote = parseFloat(document.getElementById("eigenquote").value);
+            let strompreis_1_10 = parseFloat(document.getElementById("strompreis_1_10").value) / 100;
+            let strompreis_11_20 = parseFloat(document.getElementById("strompreis_11_20").value) / 100;
+            let strompreis_21_30 = parseFloat(document.getElementById("strompreis_21_30").value) / 100;
+            let subvention = parseFloat(document.getElementById("subvention").value) / 100;
+            let anlagezins = parseFloat(document.getElementById("anlagezins").value) / 100;
+            
+            let monatliche_rate = (investition * (zins / 12)) / (1 - Math.pow(1 + (zins / 12), -laufzeit));
+            document.getElementById("monatliche_belastung").innerText = monatliche_rate.toFixed(2);
+            
+            // Szenario 1: Monatliche Raten werden 5 Jahre lang zum Anlagezins angelegt
+            let endvermoegen_szenario1 = 0;
+            for (let monat = 0; monat < laufzeit; monat++) {
+                endvermoegen_szenario1 = (endvermoegen_szenario1 + monatliche_rate) * (1 + (anlagezins / 12));
+            }
+            for (let monat = 0; monat < 25 * 12; monat++) { // 25 Jahre weiteres Wachstum
+                endvermoegen_szenario1 *= (1 + (anlagezins / 12));
+            }
+            
+            // Szenario 2: PV-Anlage mit steigenden Einnahmen
+            let einnahmen_1_10 = (jahresverbrauch * eigenquote * (strompreis_1_10 + subvention)) + ((stromproduktion - (jahresverbrauch * eigenquote)) * einspeiseverguetung);
+            let einnahmen_11_20 = (jahresverbrauch * eigenquote * (strompreis_11_20 + subvention)) + ((stromproduktion - (jahresverbrauch * eigenquote)) * einspeiseverguetung);
+            let einnahmen_21_30 = (jahresverbrauch * eigenquote * (strompreis_21_30 + subvention)) + ((stromproduktion - (jahresverbrauch * eigenquote)) * einspeiseverguetung);
+            
+            let endvermoegen_szenario2 = 0;
+            for (let jahr = 0; jahr < 30; jahr++) {
+                let einnahme = jahr < 10 ? einnahmen_1_10 : (jahr < 20 ? einnahmen_11_20 : einnahmen_21_30);
+                endvermoegen_szenario2 = (endvermoegen_szenario2 + einnahme) * (1 + anlagezins);
+            }
+            
+            // Szenario 3: Einmalige Anlage der Investitionskosten für 30 Jahre
+            let endvermoegen_szenario3 = investition * Math.pow(1 + anlagezins, 30);
+            
+            document.getElementById("endvermoegen_szenario1").innerText = endvermoegen_szenario1.toFixed(2);
+            document.getElementById("endvermoegen_szenario2").innerText = endvermoegen_szenario2.toFixed(2);
+            document.getElementById("endvermoegen_szenario3").innerText = endvermoegen_szenario3.toFixed(2);
+        }
+    </script>
+</head>
+<body onload="berechne()">
+    <h1>PV-Kalkulation</h1>
+    <label>Investitionskosten: <input id="investition" type="number" value="16000" oninput="berechne()"> €</label><br>
+    <label>Finanzierungskosten % p.a.: <input id="zins" type="number" value="4.00" oninput="berechne()"> %</label><br>
+    <label>Finanzierungsdauer in Monaten: <input id="laufzeit" type="number" value="60" oninput="berechne()"></label><br>
+    <label>Jährliche Stromproduktion: <input id="stromproduktion" type="number" value="9000" oninput="berechne()"> kWh</label><br>
+    <label>Einspeisevergütung: <input id="einspeiseverguetung" type="number" value="7.94" oninput="berechne()"> Cent/kWh</label><br>
+    <label>Jahresverbrauch: <input id="jahresverbrauch" type="number" value="4000" oninput="berechne()"> kWh</label><br>
+    <label>Eigenquote: <input id="eigenquote" type="number" value="0.6" step="0.1" oninput="berechne()"></label><br>
+    <label>Strompreis 1-10 Jahre: <input id="strompreis_1_10" type="number" value="30" oninput="berechne()"> Cent/kWh</label><br>
+    <label>Strompreis 11-20 Jahre: <input id="strompreis_11_20" type="number" value="40" oninput="berechne()"> Cent/kWh</label><br>
+    <label>Strompreis 21-30 Jahre: <input id="strompreis_21_30" type="number" value="50" oninput="berechne()"> Cent/kWh</label><br>
+    <label>Subvention: <input id="subvention" type="number" value="2.64" oninput="berechne()"> Cent/kWh</label><br>
+    <label>Anlagezins %: <input id="anlagezins" type="number" value="6" oninput="berechne()"> %</label><br>
+    
+    <h2>Ergebnisse</h2>
+    <p>Monatliche Belastung: <span id="monatliche_belastung"></span> €</p>
+    <p>Endvermögen Szenario 1 nach 30 Jahren: <span id="endvermoegen_szenario1"></span> €</p>
+    Dieses Szenario berechnet den Endwert wenn die monatliche Kreditrate zum angegeben Anlagezins für die Finanzierungsdauer angelegt wird und danach für die Restzeit zu 30 Jahren fest angelegt wird.
+    <p>Endvermögen Szenario 2 nach 30 Jahren: <span id="endvermoegen_szenario2"></span> €</p>
+    Dieses Szenario ist das eigentlich PV-Szenario. Es sind alle Einnahmen der PV-Anlage nach 30 Jahren.
+    Bitte berücksichtigen: Die aktuelle Einspeiserverütung für den Überschussstrom ist nur 20 Jahre garantiert. Die Subvention (bei Mieterstrom) ist ebenfalls nur 20 Jahre garantiert.
+    Die Rechnung läuft über 30 Jahre.
+    <p>Endvermögen Szenario 3 nach 30 Jahren: <span id="endvermoegen_szenario3"></span> €</p>
+    Anstatt einen Kredit zu finanzieren wird der Investitionsbedarf der PV-Anlage auf einmal (aus Vermögen) für 30 Jahre fix angelegt.
+</body>
+</html>

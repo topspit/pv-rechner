@@ -1,0 +1,18 @@
+# cloudbuild-dev.yaml (Dev-Umgebung)
+steps:
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/pv-rechner:$BUILD_ID', '.']
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/pv-rechner:$BUILD_ID']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: ['run', 'deploy', 'pv-rechner-dev', '--image', 'gcr.io/$PROJECT_ID/pv-rechner:$BUILD_ID', '--region', 'europe-west3', '--allow-unauthenticated']
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args: [
+      'run', 'services', 'add-iam-policy-binding', 'pv-rechner-dev',
+      '--member=allUsers',
+      '--role=roles/run.invoker',
+      '--region=europe-west3'
+    ]
+
+options:
+  logging: CLOUD_LOGGING_ONLY
