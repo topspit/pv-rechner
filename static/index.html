@@ -27,9 +27,8 @@
             for (let monat = 0; monat < laufzeit; monat++) {
                 endvermoegen_szenario1 = (endvermoegen_szenario1 + monatliche_rate) * (1 + (anlagezins / 12));
             }
-            for (let monat = 0; monat < 25 * 12; monat++) { // 25 Jahre weiteres Wachstum
-                endvermoegen_szenario1 *= (1 + (anlagezins / 12));
-            }
+            let zwischenVermoegen5Jahre = endvermoegen_szenario1
+            endvermoegen_szenario1 = endvermoegen_szenario1 * Math.pow(1 + anlagezins, 25);
             
             // Szenario 2: PV-Anlage mit steigenden Einnahmen
             let einnahmen_1_10 = (jahresverbrauch * eigenquote * (strompreis_1_10 + subvention)) + ((stromproduktion - (jahresverbrauch * eigenquote)) * einspeiseverguetung);
@@ -48,6 +47,7 @@
             document.getElementById("endvermoegen_szenario1").innerText = endvermoegen_szenario1.toFixed(2);
             document.getElementById("endvermoegen_szenario2").innerText = endvermoegen_szenario2.toFixed(2);
             document.getElementById("endvermoegen_szenario3").innerText = endvermoegen_szenario3.toFixed(2);
+            document.getElementById("zwischenVermoegen5Jahre").innerText = zwischenVermoegen5Jahre.toFixed(2);
         }
     </script>
 </head>
@@ -69,6 +69,7 @@
     <h2>Ergebnisse</h2>
     <p>Monatliche Belastung: <span id="monatliche_belastung"></span> €</p>
     <p>Endvermögen Szenario 1 nach 30 Jahren: <span id="endvermoegen_szenario1"></span> €</p>
+    <p>Zwischenvermögen 5 Jahre: <span id="zwischenVermoegen5Jahre"></span> €</p>
     Dieses Szenario berechnet den Endwert wenn die monatliche Kreditrate zum angegeben Anlagezins für die Finanzierungsdauer angelegt wird und danach für die Restzeit zu 30 Jahren fest angelegt wird.
     <p>Endvermögen Szenario 2 nach 30 Jahren: <span id="endvermoegen_szenario2"></span> €</p>
     Dieses Szenario ist das eigentlich PV-Szenario. Es sind alle Einnahmen der PV-Anlage nach 30 Jahren.
